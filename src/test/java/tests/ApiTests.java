@@ -16,11 +16,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Tag("api_tests")
 class ApiTests {
     String users;
     String email;
     String firstName;
+    Integer total;
     Response response;
     RestAssuredConfig config;
     @Test
@@ -57,23 +59,27 @@ class ApiTests {
     //"total": 12,
     @Test
     void fourthTest() {
+        step("Assert total's value is 12 in one go", ()-> {
         get("https://reqres.in/api/users?page=2")
                 .then()
                 .body("total", is(12));
+        });
     }
 
     @Test
     void fifthTest() { // как обычно все пишут
-        Integer total = given()
-                .filter(new AllureRestAssured())
+        step("PREP: form standard RestAssured get request", ()-> {
+            total =
+                given()
+                    .filter(new AllureRestAssured())
                 .when()
-                .get("https://reqres.in/api/users?page=2")
+                    .get("https://reqres.in/api/users?page=2")
                 .then()
-                .statusCode(200)
-                .extract()
-                .response()
-                .path("total");
-
+                    .statusCode(200)
+                    .extract()
+                    .response()
+                   .path("total");
+        });
         assertThat(total, is(12));
     }
 
