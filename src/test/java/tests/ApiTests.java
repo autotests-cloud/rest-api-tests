@@ -22,6 +22,8 @@ class ApiTests {
     String users;
     String email;
     String firstName;
+    String token;
+    String error;
     Integer total;
     Response response;
     RestAssuredConfig config;
@@ -49,7 +51,7 @@ class ApiTests {
     @Test
     void thirdTest() {
         step("Assign the output of get as String", ()-> {
-            String users = get("https://reqres.in/api/users?page=2").asString();
+            users = get("https://reqres.in/api/users?page=2").asString();
         });
         step("Assert that length of users is not equal to zero using is by hamcrest", ()-> {
             assertThat(users.length(), is(not(nullValue())));
@@ -60,7 +62,11 @@ class ApiTests {
     @Test
     void fourthTest() {
         step("Assert total's value is 12 in one go", ()-> {
-        get("https://reqres.in/api/users?page=2")
+            given()
+                .log().all()
+                .filter(new AllureRestAssured())
+        .when()
+            .get("https://reqres.in/api/users?page=2")
                 .then()
                 .body("total", is(12));
         });
@@ -80,137 +86,183 @@ class ApiTests {
                     .response()
                    .path("total");
         });
-        assertThat(total, is(12));
+        step("CHECK: total's value should be equal to 12 (int)", ()-> {
+            assertThat(total, is(12));
+        });
     }
 
     @Test
     void sixthTest() { // такой же как fifthTest
-        given()
+        step("PREP + CHECK total's value is equal to (int) 12", ()-> {
+            given()
                 .filter(new AllureRestAssured())
-                .when()
+            .when()
                 .get("https://reqres.in/api/users?page=2")
-                .then()
+            .then()
                 .statusCode(200)
                 .body("total", is(12));
+        });
     }
 
     @Test
     void seventhTest() {
-         email = get("https://reqres.in/api/users?page=2")
+        step("PREP: get information from data[2].email", ()-> {
+            given()
+                .log().all()
+                .filter(new AllureRestAssured());
+            email = get("https://reqres.in/api/users?page=2")
                 .then()
                 .statusCode(200)
                 .extract()
                 .response()
                 .path("data[2].email");
+        });
+
 
         assertThat(email, is("tobias.funke@reqres.in"));
     }
 
     @Test
     void eighthTest() {
-        email = get("https://reqres.in/api/users?page=2")
+        step("get ad.company", ()-> {
+            given()
+                .log().all()
+                .filter(new AllureRestAssured());
+            email = get("https://reqres.in/api/users?page=2")
                 .then()
                 .statusCode(200)
                 .extract()
                 .response()
                 .path("ad.company");
-
-        assertThat(email, is("StatusCode Weekly"));
+        });
+        step("CHECK: ad.company = StatusCode Weekly", ()-> {
+            assertThat(email, is("StatusCode Weekly"));
+        });
     }
 
     @Test
     void ninthTest() {
-        firstName = get("https://reqres.in/api/users/2")
+        step("PREP: get data.first_name from the response", ()-> {
+            given()
+                .log().all()
+                .filter(new AllureRestAssured());
+            firstName = get("https://reqres.in/api/users/2")
                 .then()
                 .statusCode(200)
                 .extract()
                 .response()
                 .path("data.first_name");
-
-        assertThat(firstName, is("Janet"));
+        });
+        step("CHECK: data.first_name = Janet", ()-> {
+            assertThat(firstName, is("Janet"));
+        });
     }
 
     @Test
     void tenthTest() {
-        firstName = get("https://reqres.in/api/users/23")
+        step("Get firstName from the API reponse", ()-> {
+            given()
+                .log().all()
+                .filter(new AllureRestAssured());
+
+            firstName = get("https://reqres.in/api/users/23")
                 .then()
                 .statusCode(404)
                 .extract()
                 .response()
                 .path("data.first_name");
-
-        assertThat(firstName, is(nullValue()));
+        });
+        step("CHECK: firstName is null", ()-> {
+            assertThat(firstName, is(nullValue()));
+        });
     }
 
     @Test
     void eleventhTest() {
-        get("https://reqres.in/api/users/23")
+        step("CHECK: status code is 404 and firt_name is null", ()-> {
+            given()
+                .log().all()
+                .filter(new AllureRestAssured());
+            get("https://reqres.in/api/users/23")
                 .then()
                 .statusCode(404)
                 .body("data.first_name", is(nullValue()));
+        });
     }
 
     @Test
     void twelfthTest() {
-        // "email": "eve.holt@reqres.in",
-        //    "password": "cityslicka"
-        response =
+        step("PREP: get the response from API", ()-> {
+            // "email": "eve.holt@reqres.in",
+            //    "password": "cityslicka"
+            response =
                 given()
-                .filter(new AllureRestAssured())
-                .contentType("application/json")
-                .body("{ \"email\": \"eve.holt@reqres.in\", \"password\": \"cityslicka\" }")
-                .when()
-                .post("https://reqres.in/api/login")
-                .then()
-                .statusCode(200)
-                .extract()
-                .response();
-
-        String token = response
+                    .filter(new AllureRestAssured())
+                    .contentType("application/json")
+                    .body("{ \"email\": \"eve.holt@reqres.in\", \"password\": \"cityslicka\" }")
+                    .when()
+                    .post("https://reqres.in/api/login")
+                    .then()
+                    .statusCode(200)
+                    .extract()
+                    .response();
+        });
+        step("ACT: token = response from position token", ()-> {
+            token = response
                 .path("token");
-
-        assertThat(token, is("QpwL5tke4Pnpja7X4"));
+        });
+        step("CHECK: token should be QpwL5tke4Pnpja7X4", ()-> {
+            assertThat(token, is("QpwL5tke4Pnpja7X4"));
+        });
     }
 
     @Test
     void thirteenthTest() {
-        // "email": "eve.holt@reqres.in",
-        //    "password": "cityslicka"
-        response =
+        step("PREP: send API request for authentication without password", ()-> {
+            // "email": "eve.holt@reqres.in",
+            //    "password": "cityslicka"
+            response =
                 given()
-                        .filter(new AllureRestAssured())
-                        .contentType("application/json")
-                        .body("{ \"email\": \"eve.holt@reqres.in\"}")
-                        .when()
-                        .post("https://reqres.in/api/login")
-                        .then()
-                        .statusCode(400)
-                        .extract()
-                        .response();
-
-        String error = response
+                    .filter(new AllureRestAssured())
+                    .contentType("application/json")
+                    .body("{ \"email\": \"eve.holt@reqres.in\"}")
+                    .when()
+                    .post("https://reqres.in/api/login")
+                    .then()
+                    .statusCode(400)
+                    .extract()
+                    .response();
+        });
+        step("ACT: set error to error from response", ()-> {
+            error = response
                 .path("error");
-
-        assertThat(error, is("Missing password"));
+        });
+        step("CHECK: error string is \'Missing password\'", ()-> {
+            assertThat(error, is("Missing password"));
+        });
     }
 
     @Test
     void fourteenthTest() {
-        config = RestAssured.config()
+        step("PREP prepare RestAssured config", ()-> {
+            config = RestAssured.config()
                 .httpClient(HttpClientConfig.httpClientConfig()
-                        .setParam(CoreConnectionPNames.CONNECTION_TIMEOUT, 5000)
-                        .setParam(CoreConnectionPNames.SO_TIMEOUT, 5000));
-
-        response =
+                    .setParam(CoreConnectionPNames.CONNECTION_TIMEOUT, 5000)
+                    .setParam(CoreConnectionPNames.SO_TIMEOUT, 5000));
+        });
+        step("ACT: get response with prepared config", ()-> {
+            response =
                 given()
-                        .config(config)
-                        .contentType("application/json")
-                        .when()
-                        .get("https://reqres.in/api/users?delay=3")
-                        .then()
-                        .statusCode(200)
-                        .extract()
-                        .response();
+                    .filter(new AllureRestAssured())
+                    .config(config)
+                    .contentType("application/json")
+                    .when()
+                    .get("https://reqres.in/api/users?delay=3")
+                    .then()
+                    .statusCode(200)
+                    .extract()
+                    .response();
+        });
 
     }
 
