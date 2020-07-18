@@ -1,41 +1,57 @@
 package tests;
 
+import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.RestAssured;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.response.Response;
 import org.apache.http.params.CoreConnectionPNames;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
+import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.get;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
+@Tag("api_tests")
 class ApiTests {
-
+    String users;
+    String email;
+    String firstName;
+    Response response;
+    RestAssuredConfig config;
     @Test
     void firstTest() {
-        String users = get("https://reqres.in/api/users?page=2").asString();
+        step("Simple get rest assured request", () -> {
+            String users = get("https://reqres.in/api/users?page=2").asString();
 
-        System.out.println(users);
+            System.out.println(users);
+        });
     }
 
     @Test
     void secondTest() {
-        String users = get("https://reqres.in/api/users?page=2").asString();
-
-        assertTrue(users.length() == 0, "length: " + users.length() + "\n" +
-                "data: " + users);
-    }
+        step("Assign users to get URI", ()->{
+            users = get("https://reqres.in/api/users?page=2").asString();
+        });
+        step("assert that length of returned value is not equal to zero", ()-> {
+//        assertTrue(users.length() == 0, "length: " + users.length() + "\n" +
+            assertFalse(users.length() == 0, "length: " + users.length() + "\n" +
+                    "data: " + users);
+        });
+        }
 
     @Test
     void thirdTest() {
-        String users = get("https://reqres.in/api/users?page=2").asString();
-
-        assertThat(users.length(), is(not(nullValue())));
+        step("Assign the output of get as String", ()-> {
+            String users = get("https://reqres.in/api/users?page=2").asString();
+        });
+        step("Assert that length of users is not equal to zero using is by hamcrest", ()-> {
+            assertThat(users.length(), is(not(nullValue())));
+        });
     }
 
     //"total": 12,
@@ -49,6 +65,7 @@ class ApiTests {
     @Test
     void fifthTest() { // как обычно все пишут
         Integer total = given()
+                .filter(new AllureRestAssured())
                 .when()
                 .get("https://reqres.in/api/users?page=2")
                 .then()
@@ -61,8 +78,9 @@ class ApiTests {
     }
 
     @Test
-    void sixTest() { // такой же как fifthTest
+    void sixthTest() { // такой же как fifthTest
         given()
+                .filter(new AllureRestAssured())
                 .when()
                 .get("https://reqres.in/api/users?page=2")
                 .then()
@@ -71,8 +89,8 @@ class ApiTests {
     }
 
     @Test
-    void sevenTest() {
-        String email = get("https://reqres.in/api/users?page=2")
+    void seventhTest() {
+         email = get("https://reqres.in/api/users?page=2")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -82,10 +100,9 @@ class ApiTests {
         assertThat(email, is("tobias.funke@reqres.in"));
     }
 
-
     @Test
-    void eightTest() {
-        String email = get("https://reqres.in/api/users?page=2")
+    void eighthTest() {
+        email = get("https://reqres.in/api/users?page=2")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -96,8 +113,8 @@ class ApiTests {
     }
 
     @Test
-    void nineTest() {
-        String firstName = get("https://reqres.in/api/users/2")
+    void ninthTest() {
+        firstName = get("https://reqres.in/api/users/2")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -108,8 +125,8 @@ class ApiTests {
     }
 
     @Test
-    void tenTest() {
-        String firstName = get("https://reqres.in/api/users/23")
+    void tenthTest() {
+        firstName = get("https://reqres.in/api/users/23")
                 .then()
                 .statusCode(404)
                 .extract()
@@ -120,7 +137,7 @@ class ApiTests {
     }
 
     @Test
-    void elevenTest() {
+    void eleventhTest() {
         get("https://reqres.in/api/users/23")
                 .then()
                 .statusCode(404)
@@ -128,11 +145,12 @@ class ApiTests {
     }
 
     @Test
-    void twelveTest() {
+    void twelfthTest() {
         // "email": "eve.holt@reqres.in",
         //    "password": "cityslicka"
-        Response response =
+        response =
                 given()
+                .filter(new AllureRestAssured())
                 .contentType("application/json")
                 .body("{ \"email\": \"eve.holt@reqres.in\", \"password\": \"cityslicka\" }")
                 .when()
@@ -149,11 +167,12 @@ class ApiTests {
     }
 
     @Test
-    void thirteenTest() {
+    void thirteenthTest() {
         // "email": "eve.holt@reqres.in",
         //    "password": "cityslicka"
-        Response response =
+        response =
                 given()
+                        .filter(new AllureRestAssured())
                         .contentType("application/json")
                         .body("{ \"email\": \"eve.holt@reqres.in\"}")
                         .when()
@@ -170,13 +189,13 @@ class ApiTests {
     }
 
     @Test
-    void fourteenTest() {
-        RestAssuredConfig config = RestAssured.config()
+    void fourteenthTest() {
+        config = RestAssured.config()
                 .httpClient(HttpClientConfig.httpClientConfig()
                         .setParam(CoreConnectionPNames.CONNECTION_TIMEOUT, 5000)
                         .setParam(CoreConnectionPNames.SO_TIMEOUT, 5000));
 
-        Response response =
+        response =
                 given()
                         .config(config)
                         .contentType("application/json")
