@@ -53,7 +53,7 @@ class ApiTests {
         step("Assign the output of get as String", ()-> {
             users = get("https://reqres.in/api/users?page=2").asString();
         });
-        step("Assert that length of users is not equal to zero using is by hamcrest", ()-> {
+        step("Assert that length of users is not equal to zero using \'is\' by hamcrest", ()-> {
             assertThat(users.length(), is(not(nullValue())));
         });
     }
@@ -93,7 +93,7 @@ class ApiTests {
 
     @Test
     void sixthTest() { // такой же как fifthTest
-        step("PREP + CHECK total's value is equal to (int) 12", ()-> {
+        step("PREP + CHECK total's value \'is\' equal to (int) 12", ()-> {
             given()
                 .filter(new AllureRestAssured())
             .when()
