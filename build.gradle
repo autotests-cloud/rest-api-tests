@@ -54,9 +54,9 @@ tasks.withType(JavaCompile) {
 }
 
 
-task api(type: Test) {
+task api_tests(type: Test) {
     useJUnitPlatform {
-        includeTags 'api'
+        includeTags 'api_tests'
 
     }
 }
